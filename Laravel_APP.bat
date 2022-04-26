@@ -75,41 +75,64 @@ IF NOT EXIST "conf.txt" (
 
 ) ELSE ( 
     set /p file=<conf.txt
-    echo ----------------------------------------
-    echo       WELCOME YOUR APP: !file!
-    echo ----------------------------------------
-
-    ECHO.
-    ECHO SELECT A OPTION BELLOW
-    ECHO.
-    ECHO 1 - Make All Controller-Model-Factory-View
-    ECHO 2 - Make Controller only
-    ECHO.
-
+    call :menu
     set /P Option="Option: " 
+    call :txt_option !option!
+    echo.
+    call :exec_option !option!
+    pause
+)
 
-    cd ./!file!
+@REM* Titulo do programa
 
+:title
     cls
     echo ----------------------------------------
     echo       WELCOME YOUR APP: !file!
     echo ----------------------------------------
     echo.
-    echo ----------------------------------------
-    IF !option! == 1 (
-        echo    Make All Controller-Model-Factory-View
-        echo ----------------------------------------
-        echo.
-        set /P Name="Name: "
-        echo.
-        call php artisan make:model !Name! -a
-    ) ELSE IF !option! == 2 (
-        echo                 Make Controller
-        echo ---------------------------------------------
-        echo.
-        set /P Name="Name: "
-        echo.
-        call php artisan make:controller !Name!
+goto :EOF
+
+@REM* Menu
+
+:menu 
+    call :title
+    ECHO.
+    ECHO 1 - Make All Controller-Model-Factory-View
+    ECHO 2 - Make Controller only
+    ECHO 3 - Make Migration only
+    ECHO 4 - Make Factory 
+    ECHO 10 - Revert Artisan Action
+    ECHO.
+goto :EOF
+
+:txt_option
+    call :title
+    IF %1 == 1 (
+        echo - Make All Controller-Model-Factory-View
+    ) ELSE IF %1 == 2 (
+        echo - Make Controller
+    ) ELSE IF %1 == 3 (
+        echo - Make Migration
+    ) else (
+        echo Option %1 not exists
+        goto :menu
     )
-    pause
-)
+goto :EOF
+
+:exec_option
+    cd ./!file!
+    IF  %1 LSS  10 (
+        set /P Name="Name: "
+    ) ELSE (
+        set /a Number= 1
+    )
+
+    IF %1 == 1 (
+        call php artisan make:model !Name! -a 
+    ) ELSE IF %1 == 2 (
+        call php artisan make:controller !Name! --resource
+    ) ELSE IF %1 == 3 (
+        call php artisan make:migration create_!Name!_table
+    ) 
+goto :EOF
