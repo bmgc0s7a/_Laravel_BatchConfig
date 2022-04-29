@@ -76,11 +76,6 @@ IF NOT EXIST "conf.txt" (
 ) ELSE ( 
     set /p file=<conf.txt
     call :menu
-    set /P Option="Option: " 
-    call :txt_option !option!
-    echo.
-    call :exec_option !option!
-    pause
 )
 
 @REM* Titulo do programa
@@ -97,13 +92,18 @@ goto :EOF
 
 :menu 
     call :title
-    ECHO.
     ECHO 1 - Make All Controller-Model-Factory-View
     ECHO 2 - Make Controller only
     ECHO 3 - Make Migration only
-    ECHO 4 - Make Factory 
-    ECHO 10 - Revert Artisan Action
+    ECHO 4 - Make Factory
+    ECHO 5 - Clear Cache  
+    ECHO 6 - Revert Artisan Action
     ECHO.
+    set /P Option="Option: " 
+    call :txt_option !option!
+    echo.
+    call :exec_option !option!
+    pause
 goto :EOF
 
 :txt_option
@@ -114,6 +114,12 @@ goto :EOF
         echo - Make Controller
     ) ELSE IF %1 == 3 (
         echo - Make Migration
+    ) ELSE IF %1 == 4 (
+        echo - Make Factory
+    ) ELSE IF %1 == 5 (
+        echo - Clean Cache
+    ELSE IF %1 == 10 (
+        echo - Revert Artisan Action
     ) else (
         echo Option %1 not exists
         goto :menu
@@ -122,10 +128,8 @@ goto :EOF
 
 :exec_option
     cd ./!file!
-    IF  %1 LSS  10 (
+    IF  %1 LSS 5 (
         set /P Name="Name: "
-    ) ELSE (
-        set /a Number= 1
     )
 
     IF %1 == 1 (
@@ -134,5 +138,14 @@ goto :EOF
         call php artisan make:controller !Name! --resource
     ) ELSE IF %1 == 3 (
         call php artisan make:migration create_!Name!_table
-    ) 
-goto :EOF
+    ) ELSE IF %1 == 4 (
+        call php artisan make:factory !Name!Factory
+    ) ELSE IF %1 == 5 (
+        call php artisan optimize:clear
+        call composer dump-autoload
+    ) ELSE IF %1 == 10 (
+        call 
+    )
+
+
+goto :menu
